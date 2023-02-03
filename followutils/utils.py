@@ -1,4 +1,5 @@
 import ast
+import re
 import pandas as pd
 
 from tqdm import tqdm
@@ -17,7 +18,7 @@ def read_source_data(path: str, file_name: str) -> Dict:
     source_data = {}
 
     original_data = pd.read_excel(full_path)\
-        .drop(['service', 'guid_contract', 'services'], axis=1) \
+        .drop(['service', 'guid_contract', 'services', 'items'], axis=1) \
         .rename(columns={"Unnamed: 0": 'id'})
 
     source_data['original'] = original_data
@@ -37,12 +38,18 @@ def fix_inn(inn: str) -> str:
     return inn
 
 
+def get_kpp(row: str) -> str:
+    pattern = re.compile(r"[a-zA-Z][a-zA-Z][a-zA-Z]=[0-9]+\?", re.IGNORECASE)
+    kpp = pattern.findall(row)[0]
+    return kpp[4:-1]
+
+
 def preprocess_organisation(dict_dataframe: Dict) -> Dict:
     dataframe = dict_dataframe['original']
     dataframe = dataframe.rename(mapping['organization'], axis=1)
-
-    dataframe = dataframe.drop_duplicates(keep='last')
-
+    dataframe = dataframe[mapping['organization'].values()]
+    dataframe = dataframe.drop_duplicates('idNumber', keep='last')
+    print(dataframe.columns)
     dataframe['name'] = dataframe['name'].apply(get_name)
     dataframe['innCode'] = dataframe['innCode'].apply(fix_inn)
     dataframe['okpoCode'] = dataframe['okpoCode'].apply(str)
@@ -57,11 +64,17 @@ def preprocess_company(dict_dataframe: Dict) -> Dict:
     dataframe = dict_dataframe['original']
     dataframe = dataframe.rename(mapping['company'], axis=1)
 
-    dataframe = dataframe.drop_duplicates(keep='last')
+    dataframe['kppCode'] = dataframe['website'].apply(get_kpp)
 
+    dataframe = dataframe[mapping['company'].values()]
+    dataframe = dataframe.drop_duplicates('registrationNumber', keep='last')
+    print(dataframe.columns)
     dataframe['name'] = dataframe['name'].apply(str.strip)
+    dataframe['registrationNumber'] = dataframe['registrationNumber'].apply(str)
+    dataframe['capital'] = dataframe['capital'].apply(str)
     dataframe['innCode'] = dataframe['innCode'].apply(fix_inn)
-    dataframe['kppCode'] = dataframe[''].apply()
+    dataframe['kppCode'] = dataframe['website'].apply(get_kpp)
+
     dataframe['jurisdiction'] = 'Russia'
 
     dict_dataframe['company'] = dataframe
@@ -70,7 +83,19 @@ def preprocess_company(dict_dataframe: Dict) -> Dict:
 
 
 def preprocess_contract(dict_dataframe: Dict) -> Dict:
-    pass
+    dataframe = dict_dataframe['original']
+    dataframe = dataframe.rename(mapping['contract'], axis=1)
+    dataframe = dataframe[mapping['contract'].values()]
+    dataframe = dataframe.drop_duplicates('procedureNumber', keep='last')
+    print(dataframe.columns)
+    dataframe['title'] = dataframe['title'].fillna('Предмет: Неизвестная услуга')
+    dataframe['contractDate'] = dataframe['contractDate'].fillna('None')
+    dataframe['numberAwards'] = dataframe['numberAwards'].apply(str)
+    dataframe['type'] = 'S'
+
+    dict_dataframe['contract'] = dataframe
+
+    return dict_dataframe
 
 
 def create_organization(row):

@@ -1,5 +1,5 @@
-from followutils.entities.entity import Entity
 import pandas as pd
+from followutils.entities.entity import Entity
 
 
 class Company(Entity):
@@ -7,9 +7,9 @@ class Company(Entity):
         super().__init__(item)
         self.entity_type = 'Company'
 
-    def from_csv_row(self, row: pd.core.series.Series):
+    def from_csv_row(self, row: pd.Series):
         self.data_dict = row.to_dict()
 
     def make_id(self, entity):
-        entity.id = self.add_id_prefix(self.data_dict['ogrnCode'], 'ogrn')
-        return
+        entity.make_id(self.data_dict['name'], self.data_dict['innCode'])
+        return entity

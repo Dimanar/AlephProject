@@ -1,6 +1,7 @@
-from followutils import utils
 import bz2
 import json
+
+from followutils import utils
 
 
 folder = 'data'
@@ -11,12 +12,12 @@ original_data = utils.read_source_data(folder, file_name)
 
 preprocessed_data = utils.preprocess_organisation(original_data)
 preprocessed_data = utils.preprocess_company(preprocessed_data)
-preprocessed_data = utils.preprocess_contracts(preprocessed_data)
+preprocessed_data = utils.preprocess_contract(preprocessed_data)
 
 
 organization = utils.generate_enitites(preprocessed_data['organization'], utils.create_organization)
 company = utils.generate_enitites(preprocessed_data['company'], utils.create_company)
-contracts = utils.generate_enitites(preprocessed_data['contracts'], utils.create_contracts)
+contracts = utils.generate_enitites(preprocessed_data['contract'], utils.create_contract)
 
 data = organization + company + contracts
 items = [i.to_dict() for i in data]

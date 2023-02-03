@@ -1,12 +1,10 @@
-import pandas as pd
 import random
 import string
-from typing import List, Dict
+import pandas as pd
 import followthemoney as ftm
 
 
 def get_unique_id():
-    # This should be fixed
     return ''.join(random.sample(string.ascii_letters, 24))
 
 
@@ -35,7 +33,6 @@ class Entity:
         entity = ftm.model.make_entity(self.entity_type)
         entity = self.make_id(entity)
         for property_name, property_value in self.data_dict.items():
-            print(property_name, property_value)
             if property_name == 'phone':
                 entity.add(property_name, property_value[0])
             else:

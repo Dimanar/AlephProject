@@ -5,3 +5,4 @@ supplier_sum_contracts: capital
 supplier_phones_list: phone
 supplier_emails_list: email
 kppCode: kppCode
+supplier_url: website

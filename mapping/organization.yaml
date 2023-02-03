@@ -1,0 +1,7 @@
+customer_url: website
+customer_inn: innCode
+customer_kpp: okpoCode
+customer_phones_list: phone
+customer_emails_list: email
+customer_info: name
+customer_crc: idNumber
